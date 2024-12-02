@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+    jenkins:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: jenkins
+        ports:
+            - "8080:8080" # Jenkins web interface
+            - "50000:50000" # Jenkins agent communication
+        volumes:
+            - jenkins_home:/var/jenkins_home
+            - /var/run/docker.sock:/var/run/docker.sock # Allow Jenkins to use Docker
+            - ~/.ssh:/var/jenkins_home/.ssh # Mount SSH keys for repository access
+        environment:
+            - DOCKER_HOST=unix:///var/run/docker.sock
+        restart: unless-stopped
+
+    # Optional: If you want to use Docker-in-Docker for builds
+    docker-dind:
+        image: docker:dind
+        container_name: jenkins-docker
+        privileged: true
+        volumes:
+            - jenkins_docker_certs:/certs/client
+            - jenkins_home:/var/jenkins_home
+        environment:
+            - DOCKER_TLS_CERTDIR=/certs
+
+volumes:
+    jenkins_home:
+    jenkins_docker_certs:

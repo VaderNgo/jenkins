@@ -1,0 +1,67 @@
+jenkins:
+    systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code plugin"
+
+    # Configure security (example - adjust as needed)
+    authorizationStrategy:
+        loggedInUsersCanDoAnything:
+            allowAnonymousRead: false
+
+    # Global credentials can be added here
+    # credentials:
+    #   system:
+    #     domainCredentials:
+    #       - credentials:
+    #         - usernamePassword:
+    #             scope: GLOBAL
+    #             id: github-credentials
+    #             username: ${GITHUB_USERNAME}
+    #             password: ${GITHUB_PASSWORD}
+
+    # Global tool configurations
+    globalToolConfiguration:
+        jdks:
+            - name: "JDK 11"
+              home: "/usr/lib/jvm/java-11-openjdk-amd64"
+        git:
+            installations:
+                - name: "Default Git"
+                  home: "git"
+        docker:
+            installations:
+                - name: "docker"
+                  home: "/usr/bin/docker"
+
+    # Configure cloud (Docker)
+    clouds:
+        - docker:
+              name: "docker"
+              dockerApi:
+                  url: "unix:///var/run/docker.sock"
+              templates:
+                  - labelString: "docker-agent"
+                    dockerTemplateBase:
+                        image: "jenkins/inbound-agent:latest"
+                        mountsRO:
+                            - "/var/run/docker.sock:/var/run/docker.sock"
+                    remoteFs: "/home/jenkins/agent"
+                    connector:
+                        attach:
+                            user: "jenkins"
+                    instanceCapacity: 2
+
+unclassified:
+    location:
+        url: http://localhost:8080/
+
+    # Configure email notifications (optional)
+    # mailer:
+    #   adminAddress: admin@example.com
+    #   replyToAddress: noreply@example.com
+    #   smtpHost: smtp.example.com
+
+    # Configure GitHub settings (optional)
+    # githubpluginconfig:
+    #   configs:
+    #     - name: "GitHub"
+    #       apiUrl: "https://api.github.com"
+    #       manageHooks: true
